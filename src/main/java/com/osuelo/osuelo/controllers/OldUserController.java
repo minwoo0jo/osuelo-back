@@ -14,7 +14,6 @@ import org.springframework.web.bind.annotation.RestController;
 import com.osuelo.osuelo.config.APIHandler;
 import com.osuelo.osuelo.models.User;
 import com.osuelo.osuelo.services.OldUserService;
-import com.osuelo.osuelo.services.RestrictedUserService;
 
 @RestController
 public class OldUserController {
@@ -22,8 +21,6 @@ public class OldUserController {
 	@Autowired
 	private OldUserService oldUserService;
 	
-	@Autowired
-	private RestrictedUserService restrictedUserService;
 	
 	//Input: List of name pairs in an "old": "new" format
 	//Output: List of all the valid mappings and all the invalid mappings
@@ -39,10 +36,17 @@ public class OldUserController {
 		return oldUserService.getUserByOldUserName(oldName);
 	}
 	
-	@RequestMapping(method=RequestMethod.POST, value="/restrictedusers")
+	@RequestMapping("/oldusernames/export/all")
+	public Map<String, String> exportAllOldUsers(@RequestParam("k") String key) {
+		if(!APIHandler.checkKey(key))
+			return null;
+		return oldUserService.exportAll();
+	}
+	
+	/*@RequestMapping(method=RequestMethod.POST, value="/restrictedusers")
 	public List<String> addIdToRU(@RequestBody Map<String, String> idPairs, @RequestParam("k") String key) {
 		if(!APIHandler.checkKey(key))
 			return null;
 		return restrictedUserService.addUsersToRU(idPairs);
-	}
+	}*/
 }

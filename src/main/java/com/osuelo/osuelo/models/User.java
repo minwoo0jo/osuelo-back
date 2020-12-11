@@ -70,6 +70,8 @@ public class User implements Comparable<User>{
 	
 	private boolean placed;
 	
+	private boolean restricted;
+	
 	private long placedMatch;
 	
 	@OneToMany(mappedBy = "tournamentWinner", fetch = FetchType.LAZY)
@@ -85,6 +87,7 @@ public class User implements Comparable<User>{
 		matchesParticipated = new ArrayList<Match>();
 		tournamentsParticipated = new ArrayList<Tournament>();
 		tournamentsWon = new ArrayList<Tournament>();
+		restricted = false;
 	}
 	
 	public User(long userId, String userName, String country, double elo) {
@@ -247,6 +250,14 @@ public class User implements Comparable<User>{
 
 	public void setPlaced(boolean placed) {
 		this.placed = placed;
+	}
+	
+	public boolean isRestricted() {
+		return restricted;
+	}
+	
+	public void setRestricted(boolean restricted) {
+		this.restricted = restricted;
 	}
 	
 	public long getPlacedMatch() {

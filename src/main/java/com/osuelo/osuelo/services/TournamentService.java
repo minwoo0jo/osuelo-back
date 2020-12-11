@@ -33,7 +33,6 @@ import com.osuelo.osuelo.helper.RequestWrapper;
 import com.osuelo.osuelo.helper.SimpleTournamentWrapper;
 import com.osuelo.osuelo.helper.TournamentWrapper;
 import com.osuelo.osuelo.models.Match;
-import com.osuelo.osuelo.models.RestrictedUser;
 import com.osuelo.osuelo.models.Tournament;
 import com.osuelo.osuelo.models.User;
 import com.osuelo.osuelo.repositories.TournamentRepository;
@@ -56,9 +55,6 @@ public class TournamentService {
 	
 	@Autowired
 	private OldUserService oldUserService;
-	
-	@Autowired
-	private RestrictedUserService restrictedUserService;
 	
 	//Lists all tournaments in the database. Only used internally and is a private method.
 	//Users will not have access to all tournaments at once, only pages of 50 at a time
@@ -361,7 +357,7 @@ public class TournamentService {
 	    		userName = challonge.getNameChanges().get(userName);
 	    	}
 	    	User tempUser = userService.getUserByName(userName);
-	    	if(userName.startsWith("@R")) {
+	    	/*if(userName.startsWith("@R")) {
 	    		try {
 	    			long rId = Long.parseLong(userName.substring(2));
 	    			RestrictedUser rUser = restrictedUserService.getRestrictedUserByUserId(rId);
@@ -381,7 +377,7 @@ public class TournamentService {
 	    			}
 	    		} catch(NumberFormatException e) {
 	    		}
-	    	}
+	    	}*/
 	    	if(tempUser == null) {
 	    		tempUser = oldUserService.getUserByOldUserName(userName);
 	    		if(tempUser == null) {
@@ -417,7 +413,7 @@ public class TournamentService {
 	    		userName = user.getUserName();
 	    	}
 	    	//Check if this player was in the records as a restricted player and unrestrict if necessary
-	    	long uId = user.getUserId();
+	    	/*long uId = user.getUserId();
 	    	if(uId != 0) {
 	    		RestrictedUser rUser = restrictedUserService.getRestrictedUserByUserId(uId);
 	    		if(rUser != null) {
@@ -434,7 +430,7 @@ public class TournamentService {
 	    			restrictedUserService.deleteRU(rUser);
 	    			user = updatedUser;
 	    		}
-	    	}
+	    	}*/
 	    	if(userName.equals(challonge.getWinner()))
 	    		tournament.setTournamentWinner(user);
 	    	users.add(user);
@@ -851,7 +847,7 @@ public class TournamentService {
 	}
 	
 	//When a user gets restricted/unrestricted, the id changes, so the old id must be manually switched with the new one
-	public void changeUserList(User oldU, User newU) {
+	/*public void changeUserList(User oldU, User newU) {
 		List<Tournament> userTournaments = oldU.getTournamentsParticipated(true);
 		for(Tournament t : userTournaments) {
 			List<User> tournamentUsers = t.getTournamentUsers(true);
@@ -869,7 +865,7 @@ public class TournamentService {
 			userService.addUser(newU);
 			tournamentRepository.save(t);
 		}
-	}
+	}*/
 	
 	//Delete all tournaments
 	public void deleteAll() {
@@ -952,11 +948,11 @@ public class TournamentService {
 		//Find the user by ID, then use that instead
 		for(User u : userListOfT) {
 			User existing = userService.getUserById(u.getUserId());
-			if(existing == null) {
+			/*if(existing == null) {
 				RestrictedUser rUser = restrictedUserService.getRestrictedUserByUserId(u.getUserId());
 				if(rUser != null)
 					existing = userService.getUserById((rUser.getRestrictedId() + 10) * -1);
-			}
+			}*/
 			if(existing == null)
 				newList.add(u);
 			else

@@ -11,11 +11,9 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.osuelo.osuelo.helper.UserWrapper;
 import com.osuelo.osuelo.models.OldUser;
-import com.osuelo.osuelo.models.RestrictedUser;
 import com.osuelo.osuelo.models.User;
 import com.osuelo.osuelo.services.CountryService;
 import com.osuelo.osuelo.services.OldUserService;
-import com.osuelo.osuelo.services.RestrictedUserService;
 import com.osuelo.osuelo.services.UserService;
 
 @RestController
@@ -29,10 +27,7 @@ public class UserController {
 	
 	@Autowired
 	private CountryService countryService;
-	
-	@Autowired
-	private RestrictedUserService restrictedUserService;
-	
+		
 	//By default, not specifying a page number will return only the first page
 	//Sorted by current rank, number of matches, or win rate
 	@CrossOrigin()
@@ -112,11 +107,11 @@ public class UserController {
 			return null;
 		UserWrapper userObject = new UserWrapper(u, u.getTournamentsParticipated(true), u.getMatchesParticipated(true));
 		List<OldUser> oldUsers = oldUserService.getOldUsersByUser(userObject.getUser());
-		RestrictedUser rUser = null;
+		/*RestrictedUser rUser = null;
 		long uId = userObject.getUser().getUserId();
 		if(uId < -9)
-			rUser = restrictedUserService.getRestrictedUserById((uId * -1) - 10);
-		userObject.initialize(oldUsers, rUser);
+			rUser = restrictedUserService.getRestrictedUserById((uId * -1) - 10);*/
+		userObject.initialize(oldUsers);
 		return userObject;
 	}
 	
@@ -129,11 +124,11 @@ public class UserController {
 			return null;
 		UserWrapper userObject = new UserWrapper(u, u.getTournamentsParticipated(true), u.getMatchesParticipated(true));
 		List<OldUser> oldUsers = oldUserService.getOldUsersByUser(userObject.getUser());
-		RestrictedUser rUser = null;
+		/*RestrictedUser rUser = null;
 		long uId = userObject.getUser().getUserId();
 		if(uId < -9)
-			rUser = restrictedUserService.getRestrictedUserById((uId * -1) - 10);
-		userObject.initialize(oldUsers, rUser);
+			rUser = restrictedUserService.getRestrictedUserById((uId * -1) - 10);*/
+		userObject.initialize(oldUsers);
 		return userObject;
 	}
 }

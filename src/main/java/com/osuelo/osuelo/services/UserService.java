@@ -17,7 +17,6 @@ import com.osuelo.osuelo.helper.DataScraper;
 import com.osuelo.osuelo.helper.EloCalculator;
 import com.osuelo.osuelo.models.Country;
 import com.osuelo.osuelo.models.Match;
-import com.osuelo.osuelo.models.RestrictedUser;
 import com.osuelo.osuelo.models.Tournament;
 import com.osuelo.osuelo.models.User;
 import com.osuelo.osuelo.repositories.UserRepository;
@@ -36,9 +35,6 @@ public class UserService {
 	
 	@Autowired
 	private MatchService matchService;
-	
-	@Autowired
-	private RestrictedUserService restrictedUserService;
 	
 	@Autowired
 	private TournamentService tournamentService;
@@ -197,7 +193,11 @@ public class UserService {
 				System.out.println(user.getUserName());
 			//If only the userId is given, use the osu API to fill in the userName
 			if(user.getUserName() == null && user.getUserId() != 0) {
-				String nameAttempt = getNameUsingId(user.getUserId());
+				String nameAttempt = "";
+				if(user.isRestricted())
+					nameAttempt = "@RU" + user.getUserId();
+				else
+					nameAttempt = getNameUsingId(user.getUserId());
 				if(nameAttempt.equals("")) {
 					System.out.println("There is no user with the userId: " + user.getUserId());
 					failure.add(user);
@@ -227,14 +227,13 @@ public class UserService {
 			}
 			//If country is missing, use the osu API to fill in the country
 			//At this point, it can be assumed that the user is valid
-			if(user.getCountry() == null)
+			if(user.getCountry() == null && !user.getUserName().startsWith("@RU"))
 				user.setCountry(getCountryUsingId(user.getUserId()));
 			//If the user already exists, do not save the user as important information is likely missing
 			//Only save the updated country and username
 			//Use addUser to completely overwrite an existing user
 			if(userRepository.existsById(user.getUserId())) {
 				User existingUser = userRepository.findById(user.getUserId()).get();
-				existingUser.setUserName(user.getUserName());
 				if(save) {
 					if(!existingUser.getCountry().equals(user.getCountry())) {
 						countryService.add1ToCountry(existingUser.getCountry(), true);
@@ -320,13 +319,14 @@ public class UserService {
 	//Will attempt to get the userId of the user through the osu API, assuming a valid userName
 	//Returns -1 if the userName is invalid
 	//Special Case: userName of "@BYE" indicates a user representing a bye in the bracket, and return will be -9
-	//Special Case: userName of "@RU{id}" indicates a restricted user, and return will be the negative of (id+9)
+	//Special Case: userName of "@RU{id}" indicates a restricted user, and return will be the id
 	public long getIdUsingName(String name, boolean override) {
 		if(name.startsWith("@RU")) {
 			long convertToId = 0;
 			try {
 				convertToId = Integer.parseInt(name.substring(3));
-				return -1 * (convertToId + 9);
+				//return -1 * (convertToId + 9);
+				return convertToId;
 			} catch (NumberFormatException e) {
 				
 			}
@@ -437,13 +437,11 @@ public class UserService {
 		try {
 			for(int i = start; i < allUsers.size(); i++) {
 				User u = allUsers.get(i);
-				if(u.getUserId() < -9) {
-					long rId = (u.getUserId() * -1) - 10;
-					RestrictedUser rUser = restrictedUserService.getRestrictedUserById(rId);
-					String userName = getNameUsingId(rUser.getUserId());
+				if(u.isRestricted()) {
+					String userName = getNameUsingId(u.getUserId());
 					if(!userName.equals("")) {
 						//unrestrict
-						changedUsers.add(unrestriction(u, userName, rUser));
+						changedUsers.add(unrestriction(u, userName));
 					}
 					continue;
 				}
@@ -460,7 +458,7 @@ public class UserService {
 				}
 				if(u.getUserName().equals(userName))
 					continue;
-				System.out.println(u.getUserName() + " changed name to " + getNameUsingId(u.getUserId()));
+				System.out.println(u.getUserName() + " changed name to " + userName);
 				User unupdated = u;
 				oldUserService.addOldUser(u.getUserName(), userName);
 				u.setUserName(userName);
@@ -478,7 +476,7 @@ public class UserService {
 	}
 	
 	//Method to manually copy all relevant user data to another user when restriction/unrestriction takes place
-	public User copyUserData(User oldU, User newU) {
+	/*public User copyUserData(User oldU, User newU) {
 		newU.setCountry(oldU.getCountry());
 		newU.setElo(oldU.getElo());
 		newU.setNumLosses(oldU.getNumLosses());
@@ -490,7 +488,7 @@ public class UserService {
 		newU.setNumTournamentWins(oldU.getNumTournamentWins());
 		newU.setNumPlacements(oldU.getNumPlacements());
 		return newU;
-	}
+	}*/
 	
 	public void deleteUser(User user) {
 		userRepository.delete(user);
@@ -556,10 +554,13 @@ public class UserService {
 	}
 	
 	//Replace the restricted user's data with a new user that has all the match and tournament info
-	public User unrestriction(User user, String userName, RestrictedUser rUser) {
-		if(user.getUserId() < -9) {
+	public User unrestriction(User user, String userName) {
+		if(user.isRestricted()) {
 			System.out.println("player " + userName + " unrestricted");
-			User unrestricted = new User();
+			user.setRestricted(false);
+			user.setUserName(userName);
+			addUser(user);
+			/*User unrestricted = new User();
 			unrestricted = copyUserData(user, unrestricted);
 			unrestricted.setUserName(userName);
 			unrestricted.setUserId(rUser.getUserId());
@@ -582,17 +583,17 @@ public class UserService {
 			oldUserService.updateRestriction(user, unrestricted);
 			deleteUser(user);
 			restrictedUserService.deleteRU(rUser);
-			return unrestricted;
+			return unrestricted;*/
 		}
 		return user;
 	}
 	
 	//Replace the user's data with a new restricted user that has all the match and tournament info
 	public User restriction(User user) {
-		if(user.getUserId() > 0) {
+		if(!user.isRestricted()) {
 			System.out.println("player " + user.getUserName() + " restricted");
-			oldUserService.addOldUser(user.getUserName(), "@RU");
-			User unupdated = oldUserService.getUserByOldUserName(user.getUserName());
+			String username = user.getUserName();
+			/*User unupdated = oldUserService.getUserByOldUserName(user.getUserName());
 			User updated = unupdated;
 			updated = copyUserData(user, updated);
 			addUser(updated);
@@ -601,7 +602,11 @@ public class UserService {
 			restrictedUserService.addUserToRU((updated.getUserId() * -1) - 10, user.getUserId());
 			oldUserService.updateRestriction(user, updated);
 			deleteUser(user);
-			return updated;
+			return updated;*/
+			user.setUserName("@RU" + user.getUserId());
+			user.setRestricted(true);
+			addUser(user);
+			oldUserService.addOldUser(username, "@RU" + user.getUserId());
 		}
 		return user;
 	}

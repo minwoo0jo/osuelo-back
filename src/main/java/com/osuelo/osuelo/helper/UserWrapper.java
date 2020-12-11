@@ -5,7 +5,6 @@ import java.util.List;
 
 import com.osuelo.osuelo.models.Match;
 import com.osuelo.osuelo.models.OldUser;
-import com.osuelo.osuelo.models.RestrictedUser;
 import com.osuelo.osuelo.models.Tournament;
 import com.osuelo.osuelo.models.User;
 
@@ -29,12 +28,12 @@ public class UserWrapper {
 		pastNames = new ArrayList<String>();
 	}
 	//Fill in data about the user from related data objects
-	public void initialize(List<OldUser> oldUsers, RestrictedUser rUser) {
+	public void initialize(List<OldUser> oldUsers) {
 		saveEloHistory();
 		if(oldUsers.size() > 0)
 			savePastNames(oldUsers);
-		if(rUser != null)
-			saveOldId(rUser);
+/*		if(rUser != null)
+			saveOldId(rUser);*/
 	}
 	//Iterate through matches to create a list of past elos
 	private void saveEloHistory() {
@@ -62,10 +61,10 @@ public class UserWrapper {
 	}
 	
 	//If currently restricted, save actual osu user id
-	private void saveOldId(RestrictedUser rUser) {
+	/*private void saveOldId(RestrictedUser rUser) {
 		if(rUser != null) 
 			oldId = rUser.getUserId();
-	}
+	}*/
 	
 	//Getters and setters
 	public User getUser() {

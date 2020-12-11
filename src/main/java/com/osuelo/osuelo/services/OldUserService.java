@@ -7,6 +7,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -28,9 +30,13 @@ public class OldUserService {
 	@Autowired
 	private UserService userService;
 	
-	@Autowired
-	private RestrictedUserService restrictedUserService;
-	
+	public Map<String, String> exportAll() {
+		List<OldUser> listOfOldUsers = StreamSupport.stream(oldUserRepository.findAll().spliterator(), false).collect(Collectors.toList());
+		Map<String, String> nameMap = new HashMap<String, String>();
+		for(OldUser u : listOfOldUsers)
+			nameMap.put(u.getOldUserName(), u.getCurrentUser().getUserName());
+		return nameMap;
+	}
 	public List<OldUser> getOldUsersByUser(User user) {
 		return oldUserRepository.findAllByCurrentUser(user);
 	}
@@ -75,14 +81,19 @@ public class OldUserService {
 		else {
 			user = userService.getUserByName(currentName);
 			//If the user does not exist already, a new user will be inserted before saving the old username
-			if(user == null) {
+			if(user == null) {/*
 				if(currentName.equals("@RU")) {
 					long rId = restrictedUserService.addRestrictedUser();
 					currentName += (rId + 1);
-				}
+				}*/
 				List<User> userList = new ArrayList<User>();
 				User newUser = new User();
 				newUser.setUserName(currentName);
+				if(currentName.startsWith("@RU")) {
+					long userId = Long.parseLong(currentName.substring(3));
+					newUser.setUserId(userId);
+					newUser.setRestricted(true);
+				}
 				userList.add(newUser);
 				userService.populateUsers(userList, true);
 				if(newUser.getUserId() == -1) {
@@ -120,7 +131,7 @@ public class OldUserService {
 		return combinedResult;
 	}
 	
-	//When a user gets restricted, their username becomes an old username
+	/*//When a user gets restricted, their username becomes an old username
 	//upon unrestriction, assuming the name is the same, that old username entry is deleted
 	//userid gets changed on restriction/unrestriction, so the old usernames are updated according to the new id
 	public void updateRestriction(User user, User newUser) {
@@ -135,7 +146,7 @@ public class OldUserService {
 				oldUserRepository.save(ou);
 			}
 		}
-	}
+	}*/
 	
 	//If any user reverts to a previous username, that old username entry is deleted
 	public void deleteAfterRevert() {
@@ -147,7 +158,7 @@ public class OldUserService {
 		}
 	}
 	
-	//If a certain user reverts to a previous usrename, that old username entry is deleted
+	//If a certain user reverts to a previous username, that old username entry is deleted
 	public void deleteAfterRevert(User user) {
 		List<OldUser> oldUsers = oldUserRepository.findAllByCurrentUser(user);
 		for(OldUser ou : oldUsers) {
