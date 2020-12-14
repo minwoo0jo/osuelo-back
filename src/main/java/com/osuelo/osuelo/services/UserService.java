@@ -234,6 +234,7 @@ public class UserService {
 			//Use addUser to completely overwrite an existing user
 			if(userRepository.existsById(user.getUserId())) {
 				User existingUser = userRepository.findById(user.getUserId()).get();
+				existingUser.setUserName(user.getUserName());
 				if(save) {
 					if(!existingUser.getCountry().equals(user.getCountry())) {
 						countryService.add1ToCountry(existingUser.getCountry(), true);
@@ -437,7 +438,7 @@ public class UserService {
 		try {
 			for(int i = start; i < allUsers.size(); i++) {
 				User u = allUsers.get(i);
-				if(u.isRestricted()) {
+				if(u.isRestricted() && u.getUserId() != 7548517) {
 					String userName = getNameUsingId(u.getUserId());
 					if(!userName.equals("")) {
 						//unrestrict
@@ -459,11 +460,10 @@ public class UserService {
 				if(u.getUserName().equals(userName))
 					continue;
 				System.out.println(u.getUserName() + " changed name to " + userName);
-				User unupdated = u;
 				oldUserService.addOldUser(u.getUserName(), userName);
 				u.setUserName(userName);
 				oldUserService.deleteAfterRevert(u);
-				matchService.changeNamesForUserMatches(unupdated, u);
+				matchService.changeNamesForUserMatches(u);
 				changedUsers.add(u);
 			}
 			changedUsers.forEach(userRepository::save);
@@ -560,6 +560,7 @@ public class UserService {
 			user.setRestricted(false);
 			user.setUserName(userName);
 			addUser(user);
+			matchService.changeNamesForUserMatches(user);
 			/*User unrestricted = new User();
 			unrestricted = copyUserData(user, unrestricted);
 			unrestricted.setUserName(userName);
@@ -590,7 +591,7 @@ public class UserService {
 	
 	//Replace the user's data with a new restricted user that has all the match and tournament info
 	public User restriction(User user) {
-		if(!user.isRestricted()) {
+		if(!user.isRestricted() || user.getUserId() == 7548517) {
 			System.out.println("player " + user.getUserName() + " restricted");
 			String username = user.getUserName();
 			/*User unupdated = oldUserService.getUserByOldUserName(user.getUserName());
@@ -607,6 +608,7 @@ public class UserService {
 			user.setRestricted(true);
 			addUser(user);
 			oldUserService.addOldUser(username, "@RU" + user.getUserId());
+			matchService.changeNamesForUserMatches(user);
 		}
 		return user;
 	}

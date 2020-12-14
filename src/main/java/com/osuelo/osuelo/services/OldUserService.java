@@ -79,10 +79,7 @@ public class OldUserService {
 			}
 		}
 		else {
-			System.out.println("currentName: " + currentName);
 			user = userService.getUserByName(currentName);
-
-			System.out.println("usernull: " + (user == null));
 			//If the user does not exist already, a new user will be inserted before saving the old username
 			if(user == null) {/*
 				if(currentName.equals("@RU")) {

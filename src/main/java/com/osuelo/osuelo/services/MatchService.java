@@ -54,34 +54,18 @@ public class MatchService {
 	}
 	
 	//When a user changes their name or gets restricted/unrestricted, the match data must be changed
-	public boolean changeNamesForUserMatches(User oldUser, User newUser) {
+	public boolean changeNamesForUserMatches(User user) {
 		try {
-			List<Match> userMatches = oldUser.getMatchesParticipated(true);
-			long userId = oldUser.getUserId();
-			long newId = newUser.getUserId();
-			String newName = newUser.getUserName();
+			List<Match> userMatches = user.getMatchesParticipated(true);
+			long userId = user.getUserId();
+			String newName = user.getUserName();
 			for(Match m : userMatches) {
 				if(m.getPlayer1Id() == userId) {
-					m.setPlayer1Id(newId);
 					m.setPlayer1(newName);
 					m.setWinner(newName);
 				}
 				else {
-					m.setPlayer2Id(newId);
 					m.setPlayer2(newName);
-				}
-				List<User> matchUsers = m.getMatchUsers(true);
-				for(User u : matchUsers) {
-					if(u.getUserId() == userId) {
-						matchUsers.remove(u);
-						matchUsers.add(newUser);
-						m.setMatchUsers(matchUsers);
-						break;
-					}
-				}
-				if(newId != userId) {
-					newUser.addMatch(m);
-					userService.addUser(newUser);
 				}
 			}
 			userMatches.forEach(matchRepository::save);
@@ -91,6 +75,33 @@ public class MatchService {
 			return false;
 		}
 	}
+	
+	/*
+	public boolean updateAllMatches() {
+		try {
+			Iterable<Match> allMatches = matchRepository.findAll();
+			for(Match m : allMatches) {
+				String player1 = userService.getUserById(m.getPlayer1Id()).getUserName();
+				String player2 = userService.getUserById(m.getPlayer2Id()).getUserName();
+				boolean diff = false;
+				if(!m.getPlayer1().equals(player1)) {
+					m.setPlayer1(player1);
+					m.setWinner(player1);
+					diff = true;
+				}
+				if(!m.getPlayer2().equals(player2)) {
+					m.setPlayer2(player2);
+					diff = true;
+				}
+				if(diff)
+					matchRepository.save(m);
+			}
+			return true;
+		} catch (Exception e) {
+			e.printStackTrace();
+			return false;
+		}
+	}*/
 	
 	//Find matches where the user did not get their elo adjusted by their last match
 	public List<Match> findBad(User user) {
