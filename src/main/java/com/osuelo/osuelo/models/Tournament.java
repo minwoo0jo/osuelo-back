@@ -46,6 +46,12 @@ public class Tournament implements Comparable<Tournament>{
 	//open indicates whether this tournament is region locked or not
 	private boolean open;
 	
+	private String regionType;
+	
+	private String region;
+	
+	private String rankRestrict;
+	
 	@ManyToOne(cascade = CascadeType.PERSIST)
 	private User tournamentWinner;
 	
@@ -136,6 +142,30 @@ public class Tournament implements Comparable<Tournament>{
 		this.open = open;
 	}
 	
+	public String getRegionType() {
+		return regionType;
+	}
+
+	public void setRegionType(String regionType) {
+		this.regionType = regionType;
+	}
+	
+	public String getRegion() {
+		return region;
+	}
+
+	public void setRegion(String region) {
+		this.region = region;
+	}
+
+	public String getRankRestrict() {
+		return rankRestrict;
+	}
+
+	public void setRankRestrict(String rankRestrict) {
+		this.rankRestrict = rankRestrict;
+	}
+
 	public Date getStartDate() {
 		return startDate;
 	}

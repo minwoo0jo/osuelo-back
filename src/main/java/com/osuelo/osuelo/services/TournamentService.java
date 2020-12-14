@@ -935,14 +935,14 @@ public class TournamentService {
 	//Take the submitted tournament, and replace users that exist already with the db version
 	//Names are temporary, so the userId will be used
 	public List<User> replaceWithExistingUsers(Tournament t) {
-		Tournament submit = new Tournament();
+		/*Tournament submit = new Tournament();
 		submit.setTournamentName(t.getTournamentName());
 		submit.setChallonge(t.getChallonge());
 		submit.setForum(t.getForum());
 		submit.setOpen(t.isOpen());
 		submit.setShortName(t.getShortName());
 		submit.setStartDate(new Date(t.getStartDate().getTime()));
-		submit.setTournamentMatches(t.getTournamentMatches(true));
+		submit.setTournamentMatches(t.getTournamentMatches(true));*/
 		List<User> userListOfT = t.getTournamentUsers(true);
 		List<User> newList = new ArrayList<User>();
 		//Find the user by ID, then use that instead
@@ -959,13 +959,13 @@ public class TournamentService {
 				newList.add(existing);
 			if(u.getUserId() == t.getTournamentWinner().getUserId()) {
 				if(existing == null)
-					submit.setTournamentWinner(u);
+					t.setTournamentWinner(u);
 				else
-					submit.setTournamentWinner(existing);
+					t.setTournamentWinner(existing);
 			}
 		}
-		submit.setTournamentUsers(newList);
-		return addTournament(submit, true);
+		t.setTournamentUsers(newList);
+		return addTournament(t, true);
 	}
 	
 	//If the rankings change after adding this tournament, save the rankings list into the tournament
