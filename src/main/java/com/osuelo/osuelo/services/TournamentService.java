@@ -168,7 +168,7 @@ public class TournamentService {
 				for(Challonge c : challonges) {
 					if(c.getNameChanges() == null || c.getNameChanges().isEmpty())
 						continue;
-					if(c.getChallongeName().equals(t.getTournamentName())) {
+					if(c.getTournamentName().equals(t.getTournamentName())) {
 						chall = c;
 						break;
 					}
@@ -214,11 +214,11 @@ public class TournamentService {
 		for(Challonge c : challonges) {
 			Tournament tournament = convertChallongeToTournament(c, override || overrideUnlikely);
 			if(tournament == null) {
-				failure.add(c.getChallongeName());
+				failure.add(c.getTournamentName());
 				continue;
 			}
 			if(tournament.getTournamentName().startsWith("invalid: ")) {
-				failure.add(c.getChallongeName());
+				failure.add(c.getTournamentName());
 				String[] names = tournament.getChallonge().substring(1, tournament.getChallonge().length() - 1).split(",");
 				int invalidSize = Integer.parseInt(tournament.getTournamentName().substring(9).split(",")[0].trim());
 				for(int i = 0; i < names.length; i++) {
@@ -229,7 +229,7 @@ public class TournamentService {
 				}
 				continue;
 			}
-			success.add(c.getChallongeName());
+			success.add(c.getTournamentName());
 			convertedChallonges.add(tournament);
 		}
 		//If the return of addTournament is not an empty list, the save has failed
@@ -260,7 +260,7 @@ public class TournamentService {
 		List<String> unlikelyNames = new ArrayList<String>();
 		String requestString = "https://api.challonge.com/v1/tournaments/";
 		//Challonge links are not case sensitive, so all links are sent in lower case for convenience
-		String tournamentName = challonge.getLink().toLowerCase();
+		String tournamentName = challonge.getChallonge().toLowerCase();
 		Map<String, String> parameters = new HashMap<String, String>();
 		parameters.put("api_key", Keys.API_KEY_CHALLONGE);
 		try {
@@ -287,7 +287,7 @@ public class TournamentService {
 			if(tournamentName.length() > 3 && tournamentName.charAt(2) == '/')
 				tournamentName = tournamentName.substring(3);
 		} catch (IndexOutOfBoundsException e) {
-			System.out.println("Invalid link: " + challonge.getLink());
+			System.out.println("Invalid link: " + challonge.getChallonge());
 			return null;
 		}
 		if(tournamentName.charAt(tournamentName.length() -1) == '/')
@@ -297,7 +297,7 @@ public class TournamentService {
 		JsonNode fullResponse = DataScraper.performGetRequest(endpoint, parameters);
 		if(fullResponse == null || fullResponse.get(0) == null ||
 				fullResponse.get(0).asText().equals("errors")) {
-			System.out.println("Tournament " + challonge.getLink() +
+			System.out.println("Tournament " + challonge.getChallonge() +
 					" is invalid. Please check that the link is correct.");
 			return null;
 		}
@@ -311,11 +311,15 @@ public class TournamentService {
 		fullResponse.forEach(listOfParticipants::add);
 		//Create the new tournament object here and save simple metadata into it to start
 		Tournament tournament = new Tournament();
-		tournament.setChallonge(challonge.getLink());
+		tournament.setChallonge(challonge.getChallonge());
 		tournament.setForum(challonge.getForum());
 		tournament.setShortName(challonge.getShortName());
-	    tournament.setTournamentName(challonge.getChallongeName());
+	    tournament.setTournamentName(challonge.getTournamentName());
 	    tournament.setOpen(challonge.isOpen());
+	    tournament.setRegion(challonge.getRegion());
+	    tournament.setRegionType(challonge.getRegionType());
+	    tournament.setRankRestrict(challonge.getRankRestrict());
+	    tournament.setDateAdded(challonge.getDateAdded());
 		String startDate = challonge.getStartDate();
 		//If the startDate not given explicitly, the startDate will be determined from the challonge API
 		//As tournament brackets can be created before the tournament, the creation date of the first participant is used instead
@@ -344,7 +348,7 @@ public class TournamentService {
 	    		tournament.setStartDate(new Date(formatter.parse(startDate).getTime()));
 		} catch (ParseException e1) {
 			e1.printStackTrace();
-			System.out.println("Tournament " + challonge.getLink() +
+			System.out.println("Tournament " + challonge.getChallonge() +
 					"does not have a valid creation date. Setting start date to current time by default");
 			tournament.setStartDate(new Date(System.currentTimeMillis()));
 		}
@@ -451,7 +455,7 @@ public class TournamentService {
 	    	namesNotFound.forEach(System.out::println);
 	    	System.out.println();
 	    	unlikelyNames.forEach(System.out::println);
-	    	System.out.println("Failed to add tournament: " + challonge.getChallongeName());
+	    	System.out.println("Failed to add tournament: " + challonge.getTournamentName());
 	    	Tournament invalid = new Tournament();
 	    	invalid.setTournamentName("invalid: " + namesNotFound.size() + ", " + unlikelyNames.size());
 	    	namesNotFound.addAll(unlikelyNames);
@@ -464,7 +468,7 @@ public class TournamentService {
 	    fullResponse = DataScraper.performGetRequest(endpoint, parameters);
 	    if(fullResponse == null || fullResponse.get(0) == null ||
 				fullResponse.get(0).asText().equals("errors")) {
-			System.out.println("Tournament " + challonge.getLink() +
+			System.out.println("Tournament " + challonge.getChallonge() +
 					" is invalid. Please check that all of the matches have completed.");
 			return null;
 		}

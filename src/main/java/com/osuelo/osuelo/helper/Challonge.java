@@ -8,15 +8,19 @@ import java.util.Map;
  */
 public class Challonge {
 	//Name of tournament
-	private String challongeName;
+	private String tournamentName;
 	//List of names that are no longer valid due to outdated challonge data
 	private Map<String, String> nameChanges;
-	private String link;
+	private String challonge;
 	private String forum = "";
 	private String winner = "";
 	private String shortName = "";
 	//open means not regional
 	private boolean open = false;
+	private String region = "";
+	private String regionType = "";
+	private String rankRestrict = "";
+	private String dateAdded = "";
 	
 	//Optional field and can be null. However, if it's null, startDate will be extracted from challonge API
 	private String startDate;
@@ -25,28 +29,28 @@ public class Challonge {
 	public Challonge() {
 		
 	}
-	public Challonge(String challongeName, String link, String startDate) {
+	public Challonge(String tournamentName, String challonge, String startDate) {
 		super();
-		this.challongeName = challongeName;
-		this.link = link;
+		this.tournamentName = tournamentName;
+		this.challonge = challonge;
 		this.startDate = startDate;
 	}
-	public Challonge(String challongeName, String link, String startDate, String shortName, String forum) {
+	public Challonge(String tournamentName, String challonge, String startDate, String shortName, String forum) {
 		super();
-		this.challongeName = challongeName;
-		this.link = link;
+		this.tournamentName = tournamentName;
+		this.challonge = challonge;
 		this.startDate = startDate;
 		this.forum = forum;
 		this.shortName = shortName;
 	}
 
 	//Getters and Setters
-	public String getChallongeName() {
-		return challongeName;
+	public String getTournamentName() {
+		return tournamentName;
 	}
 
-	public void setChallongeName(String challongeName) {
-		this.challongeName = challongeName;
+	public void setTournamentName(String tournamentName) {
+		this.tournamentName = tournamentName;
 	}
 
 	public Map<String, String> getNameChanges() {
@@ -55,12 +59,12 @@ public class Challonge {
 	public void setNameChanges(Map<String, String> nameChanges) {
 		this.nameChanges = nameChanges;
 	}
-	public String getLink() {
-		return link;
+	public String getChallonge() {
+		return challonge;
 	}
 
-	public void setLink(String link) {
-		this.link = link;
+	public void setChallonge(String challonge) {
+		this.challonge = challonge;
 	}
 
 	public String getStartDate() {
@@ -93,5 +97,29 @@ public class Challonge {
 	}
 	public void setOpen(boolean open) {
 		this.open = open;
+	}
+	public String getRegion() {
+		return region;
+	}
+	public void setRegion(String region) {
+		this.region = region;
+	}
+	public String getRegionType() {
+		return regionType;
+	}
+	public void setRegionType(String regionType) {
+		this.regionType = regionType;
+	}
+	public String getRankRestrict() {
+		return rankRestrict;
+	}
+	public void setRankRestrict(String rankRestrict) {
+		this.rankRestrict = rankRestrict;
+	}
+	public String getDateAdded() {
+		return dateAdded;
+	}
+	public void setDateAdded(String dateAdded) {
+		this.dateAdded = dateAdded;
 	}
 }
