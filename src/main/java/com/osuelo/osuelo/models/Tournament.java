@@ -52,6 +52,8 @@ public class Tournament implements Comparable<Tournament>{
 	
 	private String rankRestrict;
 	
+	private String dateAdded;
+	
 	@ManyToOne(cascade = CascadeType.PERSIST)
 	private User tournamentWinner;
 	
@@ -165,7 +167,15 @@ public class Tournament implements Comparable<Tournament>{
 	public void setRankRestrict(String rankRestrict) {
 		this.rankRestrict = rankRestrict;
 	}
+	
+	public String getDateAdded() {
+		return dateAdded;
+	}
 
+	public void setDateAdded(String dateAdded) {
+		this.dateAdded = dateAdded;
+	}
+	
 	public Date getStartDate() {
 		return startDate;
 	}
