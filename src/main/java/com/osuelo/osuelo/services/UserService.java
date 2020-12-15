@@ -438,7 +438,7 @@ public class UserService {
 		try {
 			for(int i = start; i < allUsers.size(); i++) {
 				User u = allUsers.get(i);
-				if(u.isRestricted() && u.getUserId() != 7548517) {
+				if(u.isRestricted()) {
 					String userName = getNameUsingId(u.getUserId());
 					if(!userName.equals("")) {
 						//unrestrict
@@ -591,7 +591,7 @@ public class UserService {
 	
 	//Replace the user's data with a new restricted user that has all the match and tournament info
 	public User restriction(User user) {
-		if(!user.isRestricted() || user.getUserId() == 7548517) {
+		if(!user.isRestricted()) {
 			System.out.println("player " + user.getUserName() + " restricted");
 			String username = user.getUserName();
 			/*User unupdated = oldUserService.getUserByOldUserName(user.getUserName());
