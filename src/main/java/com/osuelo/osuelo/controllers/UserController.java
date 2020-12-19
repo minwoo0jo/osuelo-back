@@ -27,7 +27,15 @@ public class UserController {
 	
 	@Autowired
 	private CountryService countryService;
-		
+	
+	//Returns the top 5 players by elo
+	//Used for home page top player table
+	@CrossOrigin()
+	@RequestMapping("/users/top")
+	public List<User> listTopPlayers() {
+		return userService.listTopPlayers();
+	}
+
 	//By default, not specifying a page number will return only the first page
 	//Sorted by current rank, number of matches, or win rate
 	@CrossOrigin()

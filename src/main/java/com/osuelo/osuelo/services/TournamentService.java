@@ -118,6 +118,12 @@ public class TournamentService {
 		return null;
 	}*/
 	
+	//Returns a list of the last 2 tournaments
+	public List<Tournament> listRecentTournaments() {
+		Pageable pageable = PageRequest.of(0, 2, Sort.by("startDate").descending());
+		return tournamentRepository.findAll(pageable).getContent();
+	}
+	
 	//Lists pages of 50 tournaments sorted by startDate
 	public List<Object> list50Tournaments(int page) {
 		if(page < 0)
@@ -129,6 +135,7 @@ public class TournamentService {
 		listTournaments.add(pageOfTournaments);
 		return listTournaments;
 	}
+	
 	
 	//Checks for tournaments by the given name
 	//Returns null if no match

@@ -57,6 +57,12 @@ public class UserService {
 		return userRepository.countByCountry(country);
 	}
 	
+	//Return a list of the top 5 players by elo
+	public List<User> listTopPlayers() {
+		Pageable pageable = PageRequest.of(0, 5);
+		return userRepository.findByPlacedOrderByEloDescRankAsc(true, pageable);
+	}
+	
 	//Get a list of placed users, sort, then return a page of 50
 	//sort condition can be specified
 	//First entry in the list is the number of users in total

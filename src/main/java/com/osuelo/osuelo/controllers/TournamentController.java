@@ -26,6 +26,14 @@ public class TournamentController {
 	@Autowired
 	private TournamentService tournamentService;
 	
+	//Returns a list of the last 2 tournaments
+	//Used by home page recent tournaments section
+	@CrossOrigin()
+	@RequestMapping("/tournaments/recent")
+	public List<Tournament> listRecentTournaments() {
+		return tournamentService.listRecentTournaments();
+	}
+	
 	//By default, not specifying a page number will return only the first page
 	//Sorted by chronological order of the start date
 	@CrossOrigin()
